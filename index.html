@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WAIFU ♾️</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #0f0f18;
+    --bg-card: #12121e;
+    --bg-card-hover: #1a1a2e;
+    --accent-purple: #9b4dca;
+    --accent-pink: #ff2d78;
+    --accent-blue: #00d4ff;
+    --accent-glow-purple: rgba(155, 77, 202, 0.4);
+    --accent-glow-pink: rgba(255, 45, 120, 0.4);
+    --accent-glow-blue: rgba(0, 212, 255, 0.3);
+    --text-primary: #f0f0ff;
+    --text-secondary: #8888aa;
+    --text-muted: #44445a;
+    --border: rgba(255,255,255,0.06);
+    --border-active: rgba(155, 77, 202, 0.5);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Metallic background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 20%, rgba(155,77,202,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,212,255,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 50% 50%, rgba(255,45,120,0.03) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── LOADER ─── */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+  #loader.hidden { opacity: 0; visibility: hidden; }
+
+  .loader-ring {
+    width: 56px;
+    height: 56px;
+    position: relative;
+  }
+  .loader-ring::before, .loader-ring::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid transparent;
+  }
+  .loader-ring::before {
+    border-top-color: var(--accent-purple);
+    border-right-color: var(--accent-pink);
+    animation: spin 1s linear infinite;
+  }
+  .loader-ring::after {
+    border-bottom-color: var(--accent-blue);
+    border-left-color: transparent;
+    animation: spin 1.5s linear infinite reverse;
+    inset: 6px;
+  }
+  .loader-dot {
+    width: 8px; height: 8px;
+    background: var(--accent-pink);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    box-shadow: 0 0 12px var(--accent-pink);
+    animation: pulse-dot 1s ease-in-out infinite;
+  }
+  .loader-text {
+    margin-top: 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--text-secondary);
+    animation: flicker 2s ease infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse-dot { 0%,100%{transform:translate(-50%,-50%) scale(1);} 50%{transform:translate(-50%,-50%) scale(1.5);} }
+  @keyframes flicker { 0%,100%{opacity:0.6;} 50%{opacity:1;} }
+
+  /* ─── MAIN APP ─── */
+  #app { position: relative; z-index: 1; }
+
+  /* ─── HEADER ─── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 50%, var(--accent-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* Search */
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 480px;
+  }
+  .search-input {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 10px 18px 10px 42px;
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-input:focus {
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px var(--accent-glow-purple);
+  }
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    font-size: 16px;
+  }
+  .search-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0; right: 0;
+    background: #16162a;
+    border: 1px solid var(--border-active);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.75), 0 0 40px rgba(155,77,202,0.18);
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    z-index: 200;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .search-dropdown.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+  }
+  .search-dropdown::-webkit-scrollbar { width: 3px; }
+  .search-dropdown::-webkit-scrollbar-thumb { background: var(--accent-purple); border-radius: 2px; }
+
+  .search-dd-header {
+    padding: 8px 14px 6px;
+    font-family: "Orbitron", sans-serif;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .search-dd-header span { color: var(--accent-purple); }
+
+  .search-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .search-item:last-child { border-bottom: none; }
+  .search-item:hover, .search-item.focused { background: rgba(155,77,202,0.12); }
+  .search-item:hover::before, .search-item.focused::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(var(--accent-purple), var(--accent-pink));
+    border-radius: 2px;
+  }
+
+  .search-thumb-wrap {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, rgba(255,255,255,0.04) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    position: relative;
+  }
+  .search-thumb-wrap.loaded { animation: none; background: var(--bg-secondary); }
+  .search-thumb-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    position: absolute; inset: 0;
+  }
+  .search-thumb-wrap img.ready { opacity: 1; }
+
+  .search-item-info { flex: 1; min-width: 0; }
+  .search-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+  .search-item-name mark {
+    background: transparent;
+    color: var(--accent-pink);
+    font-weight: 700;
+  }
+  .search-item-cat {
+    font-size: 10px;
+    color: var(--accent-purple);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-family: "Orbitron", sans-serif;
+  }
+  .search-item-arrow {
+    color: var(--text-muted);
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: color 0.15s, transform 0.15s;
+  }
+  .search-item:hover .search-item-arrow,
+  .search-item.focused .search-item-arrow { color: var(--accent-pink); transform: translateX(3px); }
+
+  .search-dd-empty, .search-dd-loading {
+    padding: 28px 14px;
+    text-align: center;
+    font-family: "Orbitron", sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+  }
+  .search-dd-loading::after {
+    content: "";
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent-purple);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+
+  /* ─── MAIN LAYOUT ─── */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  /* ─── FILTERS ─── */
+  .filters-section { margin-bottom: 28px; }
+  .filters-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-family: 'Orbitron', sans-serif;
+  }
+  .filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 6px 16px;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .filter-btn:hover {
+    border-color: var(--accent-purple);
+    color: var(--accent-purple);
+    background: rgba(155,77,202,0.08);
+  }
+  .filter-btn.active {
+    border-color: var(--accent-pink);
+    color: var(--text-primary);
+    background: linear-gradient(135deg, rgba(155,77,202,0.3), rgba(255,45,120,0.2));
+    box-shadow: 0 0 16px rgba(255,45,120,0.2);
+  }
+
+  /* ─── GRID ─── */
+  .grid-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .grid-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    font-family: 'Orbitron', sans-serif;
+  }
+  .grid-count span { color: var(--accent-purple); }
+
+  .waifu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 900px) { .waifu-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .waifu-grid { grid-template-columns: 1fr; } }
+
+  /* ─── CARD ─── */
+  .waifu-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    position: relative;
+    animation: fadeInUp 0.4s ease both;
+  }
+  .waifu-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    border-color: rgba(155,77,202,0.4);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(155,77,202,0.2), 0 0 60px rgba(255,45,120,0.08);
+  }
+  .waifu-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(155,77,202,0.05), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .waifu-card:hover::after { opacity: 1; }
+
+  .card-img-wrap {
+    position: relative;
+    padding-top: 130%;
+    overflow: hidden;
+    background: var(--bg-secondary);
+  }
+  .card-img-wrap img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease, filter 0.3s ease;
+    filter: brightness(0.95);
+  }
+  .waifu-card:hover .card-img-wrap img {
+    transform: scale(1.06);
+    filter: brightness(1.05) saturate(1.1);
+  }
+  .card-category-badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(10,10,15,0.75);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-active);
+    border-radius: 50px;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent-purple);
+    font-family: 'Orbitron', sans-serif;
+  }
+  .card-body {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-name {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-arrow {
+    color: var(--text-muted);
+    font-size: 18px;
+    transition: color 0.2s, transform 0.2s;
+    flex-shrink: 0;
+  }
+  .waifu-card:hover .card-arrow {
+    color: var(--accent-pink);
+    transform: translateX(3px);
+  }
+
+  /* ─── SKELETON ─── */
+  .skeleton-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    animation: fadeInUp 0.3s ease both;
+  }
+  .skeleton-img {
+    padding-top: 130%;
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, rgba(255,255,255,0.03) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  .skeleton-body { padding: 14px 16px; }
+  .skeleton-line {
+    height: 14px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, rgba(255,255,255,0.03) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 6px;
+  }
+  .skeleton-line.short { width: 60%; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SCROLL SENTINEL ─── */
+  #scroll-sentinel { height: 40px; }
+
+  /* ─── DETAIL VIEW ─── */
+  #detail-view {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-primary);
+    z-index: 500;
+    overflow-y: auto;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  #detail-view.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .detail-header {
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 10;
+  }
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 8px 16px;
+    color: var(--text-secondary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .back-btn:hover {
+    border-color: var(--accent-purple);
+    color: var(--text-primary);
+    box-shadow: 0 0 16px var(--accent-glow-purple);
+  }
+  .detail-header-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+  }
+
+  .detail-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  .detail-hero {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 40px;
+    margin-bottom: 60px;
+  }
+  @media (max-width: 768px) {
+    .detail-hero { grid-template-columns: 1fr; }
+  }
+  .detail-portrait {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: relative;
+    box-shadow: 0 0 60px rgba(155,77,202,0.15);
+  }
+  .detail-portrait img {
+    width: 100%;
+    display: block;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+  }
+  .detail-portrait-glow {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(155,77,202,0.3) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .detail-info { display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+  .detail-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 0%, var(--accent-purple) 60%, var(--accent-pink) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .detail-category-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(155,77,202,0.2), rgba(255,45,120,0.15));
+    border: 1px solid var(--accent-purple);
+    border-radius: 50px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-purple);
+    font-family: 'Orbitron', sans-serif;
+    width: fit-content;
+  }
+  .detail-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .stat-box:hover {
+    border-color: var(--border-active);
+    box-shadow: 0 0 20px rgba(155,77,202,0.1);
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+  }
+  .detail-desc {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.7;
+    border-left: 2px solid var(--accent-purple);
+    padding-left: 16px;
+  }
+
+  /* ─── DETAIL GALLERY ─── */
+  .gallery-section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .gallery-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 480px) { .gallery-grid { grid-template-columns: 1fr; } }
+
+  .gallery-item {
+    position: relative;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: var(--bg-secondary);
+    aspect-ratio: 4/5;
+  }
+  .gallery-item:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px rgba(0,212,255,0.15);
+  }
+  .gallery-item img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.3s;
+  }
+  .gallery-item:hover img { filter: brightness(1.1); }
+  .gallery-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    backdrop-filter: blur(2px);
+  }
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+  .download-btn-icon {
+    background: var(--accent-blue);
+    color: #000;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 0 20px var(--accent-glow-blue);
+    transition: transform 0.2s;
+  }
+  .gallery-item:hover .download-btn-icon { transform: scale(1.1); }
+  .gallery-skeleton {
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, rgba(255,255,255,0.03) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-sm);
+    aspect-ratio: 4/5;
+  }
+
+  /* ─── NO RESULTS ─── */
+  .no-results {
+    text-align: center;
+    padding: 80px 20px;
+    display: none;
+  }
+  .no-results.visible { display: block; }
+  .no-results-icon { font-size: 48px; margin-bottom: 16px; }
+  .no-results-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--accent-purple); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="loader-ring">
+    <div class="loader-dot"></div>
+  </div>
+  <div class="loader-text">WAIFU ♾️</div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <header>
+    <div class="header-inner">
+      <div class="logo" id="logo-btn">WAIFU ♾️</div>
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" id="search-input" type="text" placeholder="Search waifus...">
+        <div class="search-dropdown" id="search-dropdown"></div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-view">
+    <div class="filters-section">
+      <div class="filters-label">Categories</div>
+      <div class="filters" id="filters"></div>
+    </div>
+    <div class="grid-header">
+      <div class="grid-count">SHOWING <span id="count-display">0</span> WAIFUS</div>
+    </div>
+    <div class="no-results" id="no-results">
+      <div class="no-results-icon">🌸</div>
+      <div class="no-results-text">NO WAIFUS FOUND</div>
+    </div>
+    <div class="waifu-grid" id="waifu-grid"></div>
+    <div id="scroll-sentinel"></div>
+  </main>
+</div>
+
+<!-- Detail View -->
+<div id="detail-view">
+  <div class="detail-header">
+    <button class="back-btn" id="back-btn">← BACK</button>
+    <div class="detail-header-title">WAIFU DETAILS</div>
+  </div>
+  <div class="detail-content">
+    <div class="detail-hero">
+      <div class="detail-portrait">
+        <img id="detail-portrait-img" src="" alt="">
+        <div class="detail-portrait-glow"></div>
+      </div>
+      <div class="detail-info">
+        <div class="detail-category-tag" id="detail-category"></div>
+        <div class="detail-name" id="detail-name"></div>
+        <div class="detail-stats" id="detail-stats"></div>
+        <p class="detail-desc" id="detail-desc"></p>
+      </div>
+    </div>
+    <div class="gallery-section-title">Gallery</div>
+    <div class="gallery-grid" id="gallery-grid"></div>
+    <div id="gallery-sentinel" style="height:40px;"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  WAIFU ♾️  —  Complete rewrite: correct filters, gallery, search
+// ═══════════════════════════════════════════════════════════
+
+// ── waifu.im tag mapping per category ─────────────────────
+// IMPORTANT: Each category uses DIFFERENT tags so images don't mix
+const CAT_TAGS = {
+  'All':         ['waifu','maid','uniform','selfies','mori-calliope','raiden-shogun'],
+  'Neko':        ['neko'],
+  'Bunny Girl':  ['uniform'],
+  'Maid':        ['maid'],
+  'School Girl': ['uniform'],
+  'Goth':        ['waifu'],
+  'Demon Girl':  ['waifu'],
+  'Angel':       ['waifu'],
+  'Fox Girl':    ['waifu'],
+  'Elf':         ['raiden-shogun'],
+  'Idol':        ['mori-calliope'],
+  'Cyberpunk':   ['waifu'],
+  'Fantasy':     ['raiden-shogun'],
+  'Casual':      ['selfies'],
+};
+
+// waifu.pics fallback endpoints per category
+const PICS_TAGS = {
+  'All':         ['waifu','neko','megumin','shinobu'],
+  'Neko':        ['neko'],
+  'Bunny Girl':  ['waifu'],
+  'Maid':        ['waifu'],
+  'School Girl': ['uniform'],
+  'Goth':        ['waifu'],
+  'Demon Girl':  ['waifu'],
+  'Angel':       ['waifu'],
+  'Fox Girl':    ['neko'],
+  'Elf':         ['waifu'],
+  'Idol':        ['megumin'],
+  'Cyberpunk':   ['waifu'],
+  'Fantasy':     ['shinobu'],
+  'Casual':      ['waifu'],
+};
+
+const CATEGORIES = Object.keys(CAT_TAGS);
+
+// ── Per-category state: separate buffers + separate seen sets ──
+const catState = {};
+CATEGORIES.forEach(cat => {
+  catState[cat] = {
+    buffer: [],          // URL queue ready to render
+    seen: new Set(),     // URLs ever fetched for THIS category (no cross-pollination)
+  };
+});
+
+// Global state
+let activeFilter   = 'All';
+let gridLoading    = false;
+let gridCount      = 0;
+let galleryLoading = false;
+let currentWaifu   = null;  // { url, name, cat, galleryTag }
+
+// Per-detail-view gallery state (fresh each time card is opened)
+let galleryState = {
+  seen: new Set(),
+  tag: 'waifu',
+  cat: 'All',
+};
+
+// ── Names / flavour ────────────────────────────────────────
+const FIRST  = ['Sakura','Yuki','Hana','Rei','Asuka','Miku','Rin','Sora','Nami','Akane',
+                'Luna','Yuna','Aria','Sera','Kira','Noel','Elise','Kaya','Mina','Haru',
+                'Izumi','Aoi','Koharu','Shiori','Natsuki','Aya','Chitose','Momoka','Rena','Yua'];
+const LAST   = ['Tanaka','Suzuki','Yamamoto','Hayashi','Nakamura','Ito','Sato',
+                'Watanabe','Kimura','Kobayashi','Aoyama','Kuroda','Fujiwara','Minamoto',
+                'Hoshino','Tsukino','Kagami','Miyazaki','Himari','Otonashi'];
+const ANIMES = ['Sword Art Online','Attack on Titan','Re:Zero','Overlord',
+                'That Time I Got Reincarnated','No Game No Life','Konosuba',
+                'Demon Slayer','Fate/Stay Night','Date A Live','Spy x Family','Bocchi the Rock'];
+const HEIGHTS= ['152cm','157cm','161cm','165cm','168cm','172cm','155cm','163cm','158cm','170cm'];
+const AGES   = ['17','18','19','20','21','22','500+','1000+'];
+const DESCS  = [
+  'A mysterious soul with an ethereal presence that draws others in like moths to a flame.',
+  'Graceful and fierce, she carries the weight of her world with quiet elegance.',
+  'Beneath the soft exterior lies a heart burning with determination and hidden power.',
+  'Ancient eyes behind a modern face, carrying secrets older than the stars.',
+  'She walks between realms, belonging to none yet at home in all of them.',
+  'Her smile could end wars or start them — nobody is quite sure which they would prefer.',
+];
+
+let _nameIdx = 0;
+function nextName() {
+  const n = _nameIdx++;
+  return `${FIRST[n % FIRST.length]} ${LAST[n % LAST.length]}`;
+}
+
+// ── API Fetchers ───────────────────────────────────────────
+async function fetchFromWaifuIm(tag, limit = 30) {
+  const r = await fetch(`https://api.waifu.im/search?included_tags=${tag}&limit=${limit}&is_nsfw=false`);
+  if (!r.ok) throw new Error('waifu.im ' + r.status);
+  const j = await r.json();
+  return (j.images || []).map(i => i.url);
+}
+
+async function fetchFromWaifuPics(endpoint) {
+  const r = await fetch(`https://api.waifu.pics/sfw/${endpoint}`);
+  if (!r.ok) throw new Error('waifu.pics ' + r.status);
+  const j = await r.json();
+  return [j.url];
+}
+
+// Fetch fresh URLs for a category, push only unseen ones into its buffer
+async function fillCatBuffer(cat) {
+  const st   = catState[cat];
+  const tags = CAT_TAGS[cat];
+  const tag  = tags[Math.floor(Math.random() * tags.length)];
+
+  let urls = [];
+  try {
+    urls = await fetchFromWaifuIm(tag, 30);
+  } catch {
+    // Parallel fallback via waifu.pics
+    const picTags = PICS_TAGS[cat];
+    const calls = Array.from({length: 10}, () => {
+      const ep = picTags[Math.floor(Math.random() * picTags.length)];
+      return fetchFromWaifuPics(ep).catch(() => []);
+    });
+    urls = (await Promise.all(calls)).flat();
+  }
+
+  urls.forEach(u => {
+    if (!st.seen.has(u)) {
+      st.seen.add(u);
+      st.buffer.push(u);
+    }
+  });
+}
+
+// Get N URLs from a category's buffer (fills if needed)
+async function drainCat(cat, n) {
+  const st = catState[cat];
+  if (st.buffer.length < n) await fillCatBuffer(cat);
+  return st.buffer.splice(0, n);
+}
+
+// ── Grid / Card rendering ──────────────────────────────────
+function makeSkel() {
+  const s = document.createElement('div');
+  s.className = 'skeleton-card';
+  s.innerHTML = '<div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>';
+  return s;
+}
+
+// Search index: every card rendered goes here
+const searchIndex = [];  // { url, name, cat }
+
+function makeCard(url, cat) {
+  const name = nextName();
+  // Store in search index immediately
+  searchIndex.push({ url, name, cat });
+
+  const card = document.createElement('div');
+  card.className = 'waifu-card';
+  card.innerHTML = `
+    <div class="card-img-wrap">
+      <img loading="lazy" src="${url}" alt="${name}">
+      <div class="card-category-badge">${cat}</div>
+    </div>
+    <div class="card-body">
+      <div class="card-name">${name}</div>
+      <div class="card-arrow">›</div>
+    </div>`;
+
+  // Pick the waifu.im tag for this card's category (for gallery use)
+  const galleryTag = CAT_TAGS[cat]?.[0] || 'waifu';
+  card.addEventListener('click', () => openDetail({ url, name, cat, galleryTag }));
+  return card;
+}
+
+async function loadMore() {
+  if (gridLoading) return;
+  gridLoading = true;
+
+  const cat  = activeFilter;
+  const grid = document.getElementById('waifu-grid');
+
+  // Show 9 skeleton placeholders
+  const skels = Array.from({length: 9}, () => { const s = makeSkel(); grid.appendChild(s); return s; });
+
+  const urls = await drainCat(cat, 9);
+
+  skels.forEach((s, i) => {
+    if (urls[i]) {
+      const displayCat = cat === 'All'
+        ? CATEGORIES.filter(c => c !== 'All')[Math.floor(Math.random() * (CATEGORIES.length - 1))]
+        : cat;
+      const card = makeCard(urls[i], displayCat);
+      card.style.animationDelay = `${i * 0.045}s`;
+      s.replaceWith(card);
+      gridCount++;
+    } else {
+      s.remove();
+    }
+  });
+
+  document.getElementById('count-display').textContent = gridCount;
+  document.getElementById('no-results').classList.toggle('visible', gridCount === 0);
+  gridLoading = false;
+
+  // Background pre-fill
+  if (catState[cat].buffer.length < 6) fillCatBuffer(cat).catch(() => {});
+}
+
+// ── Filters ────────────────────────────────────────────────
+function renderFilters() {
+  const el = document.getElementById('filters');
+  el.innerHTML = CATEGORIES.map(cat =>
+    `<button class="filter-btn${activeFilter === cat ? ' active' : ''}" data-cat="${cat}">${cat}</button>`
+  ).join('');
+
+  el.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const newCat = btn.dataset.cat;
+      if (newCat === activeFilter) return;
+      activeFilter = newCat;
+      gridCount = 0;
+      document.getElementById('waifu-grid').innerHTML = '';
+      document.getElementById('count-display').textContent = '0';
+      renderFilters();
+      await loadMore();
+    });
+  });
+}
+
+// ── Infinite scroll (main grid) ────────────────────────────
+new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) loadMore();
+}, { rootMargin: '400px' }).observe(document.getElementById('scroll-sentinel'));
+
+// ═══════════════════════════════════════════════════════════
+//  SEARCH  —  works from day 1, fetches from API by category
+// ═══════════════════════════════════════════════════════════
+const searchInput    = document.getElementById('search-input');
+const searchDropdown = document.getElementById('search-dropdown');
+let   focusedIdx     = -1;
+let   searchTimeout  = null;
+let   lastQuery      = '';
+
+function highlight(text, q) {
+  if (!q) return text;
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i === -1) return text;
+  return text.slice(0, i) + '<mark>' + text.slice(i, i + q.length) + '</mark>' + text.slice(i + q.length);
+}
+
+function renderDropdown(matches, query) {
+  focusedIdx = -1;
+  if (!matches.length) {
+    searchDropdown.innerHTML = '<div class="search-dd-empty">🌸 NO RESULTS</div>';
+    searchDropdown.classList.add('visible');
+    return;
+  }
+  searchDropdown.innerHTML =
+    `<div class="search-dd-header">Results <span>${matches.length}</span></div>` +
+    matches.map((m, i) => `
+      <div class="search-item" data-idx="${i}">
+        <div class="search-thumb-wrap" data-src="${m.url}">
+          <img alt="${m.name}">
+        </div>
+        <div class="search-item-info">
+          <div class="search-item-name">${highlight(m.name, query)}</div>
+          <div class="search-item-cat">${m.cat}</div>
+        </div>
+        <div class="search-item-arrow">›</div>
+      </div>`).join('');
+
+  // Lazy thumbnail load with shimmer → fade-in
+  searchDropdown.querySelectorAll('.search-thumb-wrap').forEach(wrap => {
+    const img = wrap.querySelector('img');
+    img.onload  = () => { img.classList.add('ready'); wrap.classList.add('loaded'); };
+    img.onerror = () => { wrap.classList.add('loaded'); };
+    img.src = wrap.dataset.src;
+  });
+
+  // mousedown (not click) prevents input blur race
+  searchDropdown.querySelectorAll('.search-item').forEach(el => {
+    el.addEventListener('mousedown', e => {
+      e.preventDefault();
+      selectResult(matches[+el.dataset.idx]);
+    });
+  });
+
+  searchDropdown.classList.add('visible');
+}
+
+function hideDropdown() {
+  searchDropdown.classList.remove('visible');
+  focusedIdx = -1;
+}
+
+function selectResult(item) {
+  if (!item) return;
+  searchInput.value = '';
+  hideDropdown();
+  openDetail({ url: item.url, name: item.name, cat: item.cat, galleryTag: CAT_TAGS[item.cat]?.[0] || 'waifu' });
+}
+
+// Main search logic:
+// 1. Search local index (cards already rendered) — instant
+// 2. For category-name queries, also fetch fresh images from API
+async function doSearch(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) { hideDropdown(); return; }
+
+  // Step 1: local index search
+  let results = searchIndex.filter(item =>
+    item.name.toLowerCase().includes(q) || item.cat.toLowerCase().includes(q)
+  );
+
+  // Step 2: if query matches a category, fetch from that category's buffer
+  const matchedCats = CATEGORIES.filter(c => c !== 'All' && c.toLowerCase().includes(q));
+  if (matchedCats.length > 0) {
+    // Show loading state while we fetch
+    searchDropdown.innerHTML = '<div class="search-dd-loading">LOADING</div>';
+    searchDropdown.classList.add('visible');
+
+    for (const cat of matchedCats) {
+      // Ensure buffer has entries
+      if (catState[cat].buffer.length < 6) {
+        try { await fillCatBuffer(cat); } catch {}
+      }
+      // Peek up to 8 from buffer (don't splice — leave for grid)
+      const peek = catState[cat].buffer.slice(0, 8);
+      peek.forEach(url => {
+        if (!results.some(r => r.url === url)) {
+          // Assign a name if not in index yet
+          const indexed = searchIndex.find(r => r.url === url);
+          results.push(indexed || { url, name: nextName(), cat });
+        }
+      });
+    }
+  }
+
+  // If query changed while we were fetching, discard
+  if (lastQuery !== query) return;
+
+  // Remove dupes
+  const seen = new Set();
+  results = results.filter(r => { if (seen.has(r.url)) return false; seen.add(r.url); return true; });
+
+  renderDropdown(results.slice(0, 10), q);
+}
+
+// Input handler
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  const q = searchInput.value;
+  lastQuery = q;
+  if (!q.trim()) { hideDropdown(); return; }
+
+  // Show loading immediately
+  searchDropdown.innerHTML = '<div class="search-dd-loading">SEARCHING</div>';
+  searchDropdown.classList.add('visible');
+
+  searchTimeout = setTimeout(() => doSearch(q), 220);
+});
+
+// Re-open dropdown if user focuses with existing text
+searchInput.addEventListener('focus', () => {
+  if (searchInput.value.trim()) {
+    lastQuery = searchInput.value;
+    doSearch(searchInput.value);
+  }
+});
+
+// Close on outside click
+document.addEventListener('mousedown', e => {
+  if (!e.target.closest('.search-wrap')) hideDropdown();
+});
+
+// Keyboard navigation
+searchInput.addEventListener('keydown', e => {
+  const items = searchDropdown.querySelectorAll('.search-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    focusedIdx = Math.min(focusedIdx + 1, items.length - 1);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    focusedIdx = Math.max(focusedIdx - 1, 0);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    const focused = searchDropdown.querySelector('.search-item.focused');
+    if (focused) focused.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    return;
+  } else if (e.key === 'Escape') {
+    hideDropdown(); searchInput.blur(); return;
+  } else return;
+  items.forEach((el, i) => el.classList.toggle('focused', i === focusedIdx));
+  items[focusedIdx]?.scrollIntoView({ block: 'nearest' });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  DETAIL VIEW
+// ═══════════════════════════════════════════════════════════
+function openDetail(waifu) {
+  currentWaifu = waifu;
+
+  // Reset gallery state — use the SAME tag as the card's category
+  galleryState = {
+    seen:   new Set([waifu.url]),  // exclude the portrait itself
+    tag:    waifu.galleryTag || CAT_TAGS[waifu.cat]?.[0] || 'waifu',
+    cat:    waifu.cat,
+    buffer: [],
+  };
+
+  document.getElementById('detail-portrait-img').src = waifu.url;
+  document.getElementById('detail-name').textContent  = waifu.name;
+  document.getElementById('detail-category').textContent = `✦ ${waifu.cat}`;
+  document.getElementById('detail-desc').textContent =
+    DESCS[Math.floor(Math.random() * DESCS.length)];
+  document.getElementById('detail-stats').innerHTML = `
+    <div class="stat-box"><div class="stat-label">Anime</div><div class="stat-value">${ANIMES[Math.floor(Math.random()*ANIMES.length)]}</div></div>
+    <div class="stat-box"><div class="stat-label">Age</div><div class="stat-value">${AGES[Math.floor(Math.random()*AGES.length)]}</div></div>
+    <div class="stat-box"><div class="stat-label">Height</div><div class="stat-value">${HEIGHTS[Math.floor(Math.random()*HEIGHTS.length)]}</div></div>
+    <div class="stat-box"><div class="stat-label">Category</div><div class="stat-value">${waifu.cat}</div></div>`;
+
+  document.getElementById('gallery-grid').innerHTML = '';
+  const dv = document.getElementById('detail-view');
+  dv.classList.add('visible');
+  dv.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  loadGallery();
+}
+
+function closeDetail() {
+  document.getElementById('detail-view').classList.remove('visible');
+  document.body.style.overflow = '';
+  currentWaifu = null;
+}
+
+document.getElementById('back-btn').addEventListener('click', closeDetail);
+
+document.getElementById('logo-btn').addEventListener('click', () => {
+  closeDetail();
+  activeFilter = 'All';
+  gridCount = 0;
+  searchInput.value = '';
+  hideDropdown();
+  document.getElementById('waifu-grid').innerHTML = '';
+  renderFilters();
+  loadMore();
+});
+
+// ═══════════════════════════════════════════════════════════
+//  GALLERY  —  fetches ONLY from the same category/tag as the card
+// ═══════════════════════════════════════════════════════════
+async function loadGallery() {
+  if (galleryLoading || !currentWaifu) return;
+  galleryLoading = true;
+
+  const grid = document.getElementById('gallery-grid');
+  const n    = 4;
+
+  // Show skeletons
+  const skels = Array.from({length: n}, () => {
+    const s = document.createElement('div');
+    s.className = 'gallery-skeleton';
+    grid.appendChild(s);
+    return s;
+  });
+
+  // Fetch fresh images using the same tag as the card
+  // We do NOT use catBuffers here — fetch fresh dedicated URLs
+  if (!galleryState.buffer || galleryState.buffer.length < n) {
+    try {
+      const fresh = await fetchFromWaifuIm(galleryState.tag, 30);
+      galleryState.buffer = galleryState.buffer || [];
+      fresh.forEach(u => {
+        if (!galleryState.seen.has(u)) galleryState.buffer.push(u);
+      });
+    } catch {
+      // fallback: waifu.pics
+      const picTag = PICS_TAGS[galleryState.cat]?.[0] || 'waifu';
+      const calls = Array.from({length: 8}, () => fetchFromWaifuPics(picTag).catch(() => []));
+      const results = (await Promise.all(calls)).flat();
+      galleryState.buffer = galleryState.buffer || [];
+      results.forEach(u => {
+        if (!galleryState.seen.has(u)) galleryState.buffer.push(u);
+      });
+    }
+  }
+
+  const urls = (galleryState.buffer || []).splice(0, n);
+
+  skels.forEach((s, i) => {
+    const url = urls[i];
+    if (!url) { s.remove(); return; }
+    galleryState.seen.add(url);
+
+    const item = document.createElement('div');
+    item.className = 'gallery-item';
+    item.innerHTML = `
+      <img loading="lazy" src="${url}" alt="">
+      <div class="gallery-overlay">
+        <div class="download-btn-icon">↓</div>
+      </div>`;
+    item.addEventListener('click', () => downloadImg(url));
+    s.replaceWith(item);
+  });
+
+  galleryLoading = false;
+
+  // Pre-fill gallery buffer in background
+  if ((galleryState.buffer?.length || 0) < 4) {
+    fetchFromWaifuIm(galleryState.tag, 30).then(fresh => {
+      fresh.forEach(u => {
+        if (!galleryState.seen.has(u)) galleryState.buffer.push(u);
+      });
+    }).catch(() => {});
+  }
+}
+
+// Gallery infinite scroll
+new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) loadGallery();
+}, { root: document.getElementById('detail-view'), rootMargin: '300px' })
+.observe(document.getElementById('gallery-sentinel'));
+
+// ── Download ───────────────────────────────────────────────
+function downloadImg(url) {
+  const a = document.createElement('a');
+  a.href = url; a.download = 'waifu.jpg'; a.target = '_blank';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════
+(async function init() {
+  // Pre-fill 3 most-visited categories in parallel for fast start
+  await Promise.all([
+    fillCatBuffer('All'),
+    fillCatBuffer('Neko'),
+    fillCatBuffer('Maid'),
+  ]);
+  renderFilters();
+  await loadMore();
+  document.getElementById('loader').classList.add('hidden');
+  // Pre-warm remaining categories quietly in background
+  const rest = CATEGORIES.filter(c => !['All','Neko','Maid'].includes(c));
+  rest.forEach(c => fillCatBuffer(c).catch(() => {}));
+})();
+</script>
+</body>
+</html>
